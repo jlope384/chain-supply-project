@@ -36,6 +36,7 @@
           buildInputs = with pkgs.python3Packages; [
             uvicorn
             pydantic
+            pydantic-settings
             neo4j
             python-multipart
             fastapi
