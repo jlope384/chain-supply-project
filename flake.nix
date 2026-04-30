@@ -3,15 +3,12 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    naersk.url = "github:nix-community/naersk";
-
     flake-utils.url = "github:numtide/flake-utils";
   };
 
   outputs =
     {
       nixpkgs,
-      naersk,
       flake-utils,
       ...
     }:
@@ -21,25 +18,28 @@
       let
 
         pkgs = nixpkgs.legacyPackages.${system};
-        naerskLib = pkgs.callPackages naersk { };
 
-        base_lib = with pkgs; [
-        ];
-
-        std_bin = with pkgs; [
+        packages = with pkgs; [
           svelte-language-server
           nodejs
           typescript-language-server
           tailwindcss
           tailwindcss-language-server
+          pyright
         ];
 
-        link_flag = base_lib ++ std_bin;
       in
       {
 
         devShell = pkgs.mkShell {
-          packages = std_bin;
+          inherit packages;
+          buildInputs = with pkgs.python3Packages; [
+            uvicorn
+            pydantic
+            neo4j
+            python-multipart
+            fastapi
+          ];
         };
 
       }
