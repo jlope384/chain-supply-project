@@ -22,4 +22,4 @@ def close_driver():
         _driver = None
 
 def get_session():
-    return get_driver().session(database=settings.NEO4J_DATABASE)
+    return get_driver().session(database=settings.NEO4J_DATABASE or None)

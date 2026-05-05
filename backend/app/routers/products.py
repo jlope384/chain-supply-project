@@ -1,26 +1,26 @@
 from fastapi import APIRouter, HTTPException, Query
 from typing import Optional, List
 from pydantic import BaseModel
-from datetime import date
 from app.db import get_session
 
 router = APIRouter()
 
-class SupplierCreate(BaseModel):
+class ProductCreate(BaseModel):
     name: str
-    country: str
-    active: bool = True
-    rating: float = 0.0
-    certifications: List[str] = []
-    founded_at: Optional[date] = None
+    sku: str
+    price: float
+    weight: float = 0.0
+    category: str
+    in_stock: bool = True
+    description: Optional[str] = ""
 
-class SupplierUpdate(BaseModel):
+class ProductUpdate(BaseModel):
     name: Optional[str] = None
-    country: Optional[str] = None
-    active: Optional[bool] = None
-    rating: Optional[float] = None
-    certifications: Optional[List[str]] = None
-    founded_at: Optional[date] = None
+    price: Optional[float] = None
+    weight: Optional[float] = None
+    category: Optional[str] = None
+    in_stock: Optional[bool] = None
+    description: Optional[str] = None
 
 def node_to_dict(node):
     d = dict(node)
@@ -30,148 +30,158 @@ def node_to_dict(node):
     return d
 
 @router.post("/", status_code=201)
-async def create_supplier(data: SupplierCreate):
+async def create_product(data: ProductCreate):
     with get_session() as session:
         result = session.run(
             """
-            CREATE (s:Supplier {
+            CREATE (p:Product {
                 name: $name,
-                country: $country,
-                active: $active,
-                rating: $rating,
-                certifications: $certifications,
-                founded_at: date($founded_at),
+                sku: $sku,
+                price: $price,
+                weight: $weight,
+                category: $category,
+                in_stock: $in_stock,
+                description: $description,
                 created_at: datetime()
             })
-            RETURN elementId(s) AS id, s
+            RETURN elementId(p) AS id, p
             """,
             name=data.name,
-            country=data.country,
-            active=data.active,
-            rating=data.rating,
-            certifications=data.certifications,
-            founded_at=str(data.founded_at) if data.founded_at else str(date.today()),
+            sku=data.sku,
+            price=data.price,
+            weight=data.weight,
+            category=data.category,
+            in_stock=data.in_stock,
+            description=data.description or "",
         )
         record = result.single()
         if not record:
-            raise HTTPException(500, "Failed to create supplier")
-        return {"id": record["id"], **node_to_dict(record["s"])}
+            raise HTTPException(500, "Failed to create product")
+        return {"id": record["id"], **node_to_dict(record["p"])}
 
 @router.get("/")
-async def list_suppliers(
-    country: Optional[str] = None,
-    active: Optional[bool] = None,
-    min_rating: Optional[float] = None,
+async def list_products(
+    category: Optional[str] = None,
+    in_stock: Optional[bool] = None,
+    min_price: Optional[float] = None,
+    max_price: Optional[float] = None,
     skip: int = 0,
     limit: int = Query(50, le=200),
 ):
     filters = []
     params: dict = {"skip": skip, "limit": limit}
-    if country:
-        filters.append("s.country = $country")
-        params["country"] = country
-    if active is not None:
-        filters.append("s.active = $active")
-        params["active"] = active
-    if min_rating is not None:
-        filters.append("s.rating >= $min_rating")
-        params["min_rating"] = min_rating
+    if category:
+        filters.append("toLower(p.category) CONTAINS toLower($category)")
+        params["category"] = category
+    if in_stock is not None:
+        filters.append("p.in_stock = $in_stock")
+        params["in_stock"] = in_stock
+    if min_price is not None:
+        filters.append("p.price >= $min_price")
+        params["min_price"] = min_price
+    if max_price is not None:
+        filters.append("p.price <= $max_price")
+        params["max_price"] = max_price
 
     where = "WHERE " + " AND ".join(filters) if filters else ""
     with get_session() as session:
         result = session.run(
-            f"MATCH (s:Supplier) {where} RETURN elementId(s) AS id, s SKIP $skip LIMIT $limit",
+            f"MATCH (p:Product) {where} RETURN elementId(p) AS id, p SKIP $skip LIMIT $limit",
             **params
         )
-        return [{"id": r["id"], **node_to_dict(r["s"])} for r in result]
+        return [{"id": r["id"], **node_to_dict(r["p"])} for r in result]
 
 @router.get("/stats")
-async def supplier_stats():
+async def product_stats():
     with get_session() as session:
         result = session.run("""
-            MATCH (s:Supplier)
-            RETURN 
-                count(s) AS total,
-                avg(s.rating) AS avg_rating,
-                count(CASE WHEN s.active THEN 1 END) AS active_count,
-                collect(DISTINCT s.country) AS countries
+            MATCH (p:Product)
+            RETURN
+                count(p) AS total,
+                avg(p.price) AS avg_price,
+                min(p.price) AS min_price,
+                max(p.price) AS max_price,
+                count(CASE WHEN p.in_stock THEN 1 END) AS in_stock_count,
+                collect(DISTINCT p.category) AS categories
         """)
         r = result.single()
         return {
             "total": r["total"],
-            "avg_rating": round(r["avg_rating"] or 0, 2),
-            "active_count": r["active_count"],
-            "countries": r["countries"],
+            "avg_price": round(r["avg_price"] or 0, 2),
+            "min_price": r["min_price"],
+            "max_price": r["max_price"],
+            "in_stock_count": r["in_stock_count"],
+            "categories": r["categories"],
         }
 
-@router.get("/{supplier_id}")
-async def get_supplier(supplier_id: str):
+@router.get("/{product_id}")
+async def get_product(product_id: str):
     with get_session() as session:
         result = session.run(
-            "MATCH (s:Supplier) WHERE elementId(s) = $id RETURN elementId(s) AS id, s",
-            id=supplier_id
+            "MATCH (p:Product) WHERE elementId(p) = $id RETURN elementId(p) AS id, p",
+            id=product_id
         )
         record = result.single()
         if not record:
-            raise HTTPException(404, "Supplier not found")
-        return {"id": record["id"], **node_to_dict(record["s"])}
+            raise HTTPException(404, "Product not found")
+        return {"id": record["id"], **node_to_dict(record["p"])}
 
-@router.patch("/{supplier_id}")
-async def update_supplier(supplier_id: str, data: SupplierUpdate):
+@router.patch("/{product_id}")
+async def update_product(product_id: str, data: ProductUpdate):
     updates = {k: v for k, v in data.model_dump(exclude_none=True).items()}
     if not updates:
         raise HTTPException(400, "No fields to update")
-    set_clauses = ", ".join([f"s.{k} = ${k}" for k in updates])
+    set_clauses = ", ".join([f"p.{k} = ${k}" for k in updates])
     with get_session() as session:
         result = session.run(
-            f"MATCH (s:Supplier) WHERE elementId(s) = $id SET {set_clauses} RETURN elementId(s) AS id, s",
-            id=supplier_id, **updates
+            f"MATCH (p:Product) WHERE elementId(p) = $id SET {set_clauses} RETURN elementId(p) AS id, p",
+            id=product_id, **updates
         )
         record = result.single()
         if not record:
-            raise HTTPException(404, "Supplier not found")
-        return {"id": record["id"], **node_to_dict(record["s"])}
+            raise HTTPException(404, "Product not found")
+        return {"id": record["id"], **node_to_dict(record["p"])}
 
-@router.delete("/{supplier_id}", status_code=204)
-async def delete_supplier(supplier_id: str):
+@router.delete("/{product_id}", status_code=204)
+async def delete_product(product_id: str):
     with get_session() as session:
         result = session.run(
-            "MATCH (s:Supplier) WHERE elementId(s) = $id DETACH DELETE s RETURN count(s) AS deleted",
-            id=supplier_id
+            "MATCH (p:Product) WHERE elementId(p) = $id DETACH DELETE p RETURN count(p) AS deleted",
+            id=product_id
         )
         if result.single()["deleted"] == 0:
-            raise HTTPException(404, "Supplier not found")
+            raise HTTPException(404, "Product not found")
 
 @router.delete("/", status_code=204)
-async def delete_multiple_suppliers(ids: List[str]):
+async def delete_multiple_products(ids: List[str]):
     with get_session() as session:
         session.run(
-            "MATCH (s:Supplier) WHERE elementId(s) IN $ids DETACH DELETE s",
+            "MATCH (p:Product) WHERE elementId(p) IN $ids DETACH DELETE p",
             ids=ids
         )
 
-@router.post("/{supplier_id}/properties")
-async def add_properties(supplier_id: str, props: dict):
-    set_clauses = ", ".join([f"s.{k} = ${k}" for k in props])
+@router.post("/{product_id}/properties")
+async def add_properties(product_id: str, props: dict):
+    set_clauses = ", ".join([f"p.{k} = ${k}" for k in props])
     with get_session() as session:
         result = session.run(
-            f"MATCH (s:Supplier) WHERE elementId(s) = $id SET {set_clauses} RETURN elementId(s) AS id, s",
-            id=supplier_id, **props
+            f"MATCH (p:Product) WHERE elementId(p) = $id SET {set_clauses} RETURN elementId(p) AS id, p",
+            id=product_id, **props
         )
         record = result.single()
         if not record:
             raise HTTPException(404, "Not found")
-        return {"id": record["id"], **node_to_dict(record["s"])}
+        return {"id": record["id"], **node_to_dict(record["p"])}
 
-@router.delete("/{supplier_id}/properties")
-async def remove_properties(supplier_id: str, keys: List[str]):
-    remove_clauses = ", ".join([f"s.{k}" for k in keys])
+@router.delete("/{product_id}/properties")
+async def remove_properties(product_id: str, keys: List[str]):
+    remove_clauses = ", ".join([f"p.{k}" for k in keys])
     with get_session() as session:
         result = session.run(
-            f"MATCH (s:Supplier) WHERE elementId(s) = $id REMOVE {remove_clauses} RETURN elementId(s) AS id, s",
-            id=supplier_id
+            f"MATCH (p:Product) WHERE elementId(p) = $id REMOVE {remove_clauses} RETURN elementId(p) AS id, p",
+            id=product_id
         )
         record = result.single()
         if not record:
             raise HTTPException(404, "Not found")
-        return {"id": record["id"], **node_to_dict(record["s"])}
+        return {"id": record["id"], **node_to_dict(record["p"])}
