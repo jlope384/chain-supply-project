@@ -1,14 +1,9 @@
 <script>
+  import { X } from "lucide-svelte";
   let { open = $bindable(false), title = "", children, onclose } = $props();
 
-  function close() {
-    open = false;
-    onclose?.();
-  }
-
-  function onkeydown(e) {
-    if (e.key === "Escape") close();
-  }
+  function close() { open = false; onclose?.(); }
+  function onkeydown(e) { if (e.key === "Escape") close(); }
 </script>
 
 <svelte:window onkeydown={onkeydown} />
@@ -20,7 +15,7 @@
     <div class="modal" onclick={(e) => e.stopPropagation()}>
       <div class="modal-header">
         <h2>{title}</h2>
-        <button class="close-btn" onclick={close}>✕</button>
+        <button class="close-btn" onclick={close}><X size={18} /></button>
       </div>
       <div class="modal-body">
         {@render children()}
@@ -31,48 +26,25 @@
 
 <style>
   .overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
+    position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+    display: flex; align-items: center; justify-content: center; z-index: 1000;
+    backdrop-filter: blur(2px);
   }
   .modal {
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 12px;
-    width: min(560px, 95vw);
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    background: #1e293b; border: 1px solid #334155; border-radius: 12px;
+    width: min(580px, 95vw); max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.5);
   }
   .modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid #334155;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.1rem 1.5rem; border-bottom: 1px solid #334155;
   }
-  h2 {
-    margin: 0;
-    font-size: 1.1rem;
-    color: #f1f5f9;
-  }
+  h2 { margin: 0; font-size: 1rem; color: #f1f5f9; font-weight: 600; }
   .close-btn {
-    background: none;
-    border: none;
-    color: #94a3b8;
-    cursor: pointer;
-    font-size: 1.1rem;
-    padding: 0.25rem;
-    line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+    background: none; border: none; color: #475569; cursor: pointer;
+    width: 30px; height: 30px; border-radius: 6px; transition: background 0.12s, color 0.12s;
   }
-  .close-btn:hover {
-    color: #f1f5f9;
-  }
-  .modal-body {
-    padding: 1.5rem;
-  }
+  .close-btn:hover { background: #334155; color: #f1f5f9; }
+  .modal-body { padding: 1.5rem; }
 </style>

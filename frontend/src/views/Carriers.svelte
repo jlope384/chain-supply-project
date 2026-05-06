@@ -18,8 +18,10 @@
   const columns = [
     { key: "name", label: "Nombre" },
     { key: "modes", label: "Modos", render: (v) => Array.isArray(v) ? v.join(", ") : v },
-    { key: "rating", label: "Rating" },
-    { key: "active", label: "Activo", render: (v) => v ? "✅" : "❌" },
+    { key: "rating", label: "Rating", render: (v) => `★ ${Number(v).toFixed(1)}` },
+    { key: "active", label: "Activo", render: (v) => v
+        ? '<span class="badge green">Activo</span>'
+        : '<span class="badge red">Inactivo</span>' },
     { key: "regions", label: "Regiones", render: (v) => Array.isArray(v) ? v.join(", ") : v },
     { key: "onboarded_at", label: "Incorporado" },
   ];

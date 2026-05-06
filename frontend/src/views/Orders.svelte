@@ -17,13 +17,15 @@
     return { order_id: "", status: "PENDING", total: 0, placed_at: "", fulfilled: false, notes: "" };
   }
 
-  const statusColors = { PENDING: "#fde68a", SHIPPED: "#93c5fd", DELIVERED: "#86efac", RETURNED: "#fca5a5" };
+  const statusBadge = { PENDING: "yellow", SHIPPED: "blue", DELIVERED: "green", RETURNED: "red" };
 
   const columns = [
     { key: "order_id", label: "ID Orden" },
-    { key: "status", label: "Estado", render: (v) => `<span style="color:${statusColors[v] || '#e2e8f0'}">${v}</span>` },
+    { key: "status", label: "Estado", render: (v) => `<span class="badge ${statusBadge[v] || ''}">${v}</span>` },
     { key: "total", label: "Total", render: (v) => `$${Number(v ?? 0).toFixed(2)}` },
-    { key: "fulfilled", label: "Cumplida", render: (v) => v ? "✅" : "❌" },
+    { key: "fulfilled", label: "Cumplida", render: (v) => v
+        ? '<span class="badge green">Sí</span>'
+        : '<span class="badge red">No</span>' },
     { key: "placed_at", label: "Fecha", render: (v) => v ? v.substring(0, 10) : "—" },
     { key: "notes", label: "Notas" },
   ];

@@ -1,4 +1,9 @@
 <script>
+  import {
+    LayoutDashboard, Factory, Package, Warehouse, ShoppingCart,
+    Truck, Tag, Share2, BarChart3, FileUp, ChevronLeft, ChevronRight
+  } from "lucide-svelte";
+
   import Toast from "./lib/Toast.svelte";
   import Dashboard from "./views/Dashboard.svelte";
   import Suppliers from "./views/Suppliers.svelte";
@@ -12,47 +17,56 @@
   import CsvUpload from "./views/CsvUpload.svelte";
 
   const views = [
-    { key: "dashboard", label: "Dashboard", icon: "🏠", component: Dashboard },
-    { key: "suppliers", label: "Proveedores", icon: "🏭", component: Suppliers },
-    { key: "products", label: "Productos", icon: "📦", component: Products },
-    { key: "warehouses", label: "Bodegas", icon: "🏗️", component: Warehouses },
-    { key: "orders", label: "Órdenes", icon: "🛒", component: Orders },
-    { key: "carriers", label: "Transportistas", icon: "🚚", component: Carriers },
-    { key: "tags", label: "Tags", icon: "🏷️", component: Tags },
-    { key: "relationships", label: "Relaciones", icon: "🔗", component: Relationships },
-    { key: "analytics", label: "Analíticas", icon: "📊", component: Analytics },
-    { key: "csv", label: "Carga CSV", icon: "📁", component: CsvUpload },
+    { key: "dashboard",     label: "Dashboard",      icon: LayoutDashboard, component: Dashboard },
+    { key: "suppliers",     label: "Proveedores",    icon: Factory,         component: Suppliers },
+    { key: "products",      label: "Productos",      icon: Package,         component: Products },
+    { key: "warehouses",    label: "Bodegas",        icon: Warehouse,       component: Warehouses },
+    { key: "orders",        label: "Órdenes",        icon: ShoppingCart,    component: Orders },
+    { key: "carriers",      label: "Transportistas", icon: Truck,           component: Carriers },
+    { key: "tags",          label: "Tags",           icon: Tag,             component: Tags },
+    { key: "relationships", label: "Relaciones",     icon: Share2,          component: Relationships },
+    { key: "analytics",     label: "Analíticas",     icon: BarChart3,       component: Analytics },
+    { key: "csv",           label: "Carga CSV",      icon: FileUp,          component: CsvUpload },
   ];
 
   let current = $state("dashboard");
-  let sidebarOpen = $state(true);
+  let collapsed = $state(false);
 
   let activeView = $derived(views.find((v) => v.key === current));
 </script>
 
-<div class="app" class:sidebar-collapsed={!sidebarOpen}>
+<div class="app" class:collapsed>
   <aside class="sidebar">
-    <div class="sidebar-brand">
-      <span class="brand-icon">⛓️</span>
-      {#if sidebarOpen}<span class="brand-text">Supply Chain</span>{/if}
+    <div class="brand">
+      <div class="brand-icon">
+        <Share2 size={20} />
+      </div>
+      {#if !collapsed}
+        <span class="brand-text">Supply Chain</span>
+      {/if}
     </div>
 
     <nav>
       {#each views as view}
+        {@const Icon = view.icon}
         <button
           class="nav-item"
           class:active={current === view.key}
           onclick={() => current = view.key}
-          title={view.label}
+          title={collapsed ? view.label : ""}
         >
-          <span class="nav-icon">{view.icon}</span>
-          {#if sidebarOpen}<span class="nav-label">{view.label}</span>{/if}
+          <span class="nav-icon"><Icon size={18} /></span>
+          {#if !collapsed}<span class="nav-label">{view.label}</span>{/if}
         </button>
       {/each}
     </nav>
 
-    <button class="toggle-btn" onclick={() => sidebarOpen = !sidebarOpen}>
-      {sidebarOpen ? "◀" : "▶"}
+    <button class="collapse-btn" onclick={() => collapsed = !collapsed} title={collapsed ? "Expandir" : "Colapsar"}>
+      {#if collapsed}
+        <ChevronRight size={16} />
+      {:else}
+        <ChevronLeft size={16} />
+      {/if}
     </button>
   </aside>
 
@@ -74,11 +88,17 @@
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background: #0f172a;
     color: #e2e8f0;
+    -webkit-font-smoothing: antialiased;
   }
-  :global(input:focus, select:focus) {
+  :global(input:focus, select:focus, textarea:focus) {
     outline: 2px solid #4f46e5;
     outline-offset: 0;
   }
+  :global(.badge) { padding: 0.2rem 0.55rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+  :global(.badge.green)  { background: #14532d; color: #86efac; }
+  :global(.badge.red)    { background: #7f1d1d; color: #fca5a5; }
+  :global(.badge.yellow) { background: #713f12; color: #fde68a; }
+  :global(.badge.blue)   { background: #1e3a5f; color: #93c5fd; }
 
   .app {
     display: grid;
@@ -86,10 +106,9 @@
     min-height: 100vh;
     transition: grid-template-columns 0.2s ease;
   }
-  .app.sidebar-collapsed {
-    grid-template-columns: 56px 1fr;
-  }
+  .app.collapsed { grid-template-columns: 60px 1fr; }
 
+  /* ── Sidebar ── */
   .sidebar {
     background: #1e293b;
     border-right: 1px solid #334155;
@@ -101,71 +120,90 @@
     overflow: hidden;
   }
 
-  .sidebar-brand {
+  .brand {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 1.25rem 1rem;
+    padding: 1.1rem 1rem;
     border-bottom: 1px solid #334155;
-    font-weight: 700;
-    font-size: 1rem;
-    color: #f1f5f9;
-    white-space: nowrap;
     overflow: hidden;
   }
-  .brand-icon { font-size: 1.3rem; flex-shrink: 0; }
-  .brand-text { overflow: hidden; }
+  .brand-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: #4f46e5;
+    border-radius: 8px;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .brand-text {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #f1f5f9;
+    white-space: nowrap;
+  }
 
   nav {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 1px;
     padding: 0.75rem 0.5rem;
     overflow-y: auto;
+    overflow-x: hidden;
   }
 
   .nav-item {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.6rem 0.75rem;
-    border-radius: 8px;
+    gap: 0.7rem;
+    padding: 0.55rem 0.75rem;
+    border-radius: 7px;
     border: none;
     background: none;
-    color: #94a3b8;
+    color: #64748b;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     text-align: left;
     white-space: nowrap;
     overflow: hidden;
-    transition: background 0.15s, color 0.15s;
+    transition: background 0.12s, color 0.12s;
     width: 100%;
   }
-  .nav-item:hover { background: #334155; color: #e2e8f0; }
-  .nav-item.active { background: #4f46e5; color: #fff; }
-  .nav-icon { font-size: 1.1rem; flex-shrink: 0; }
+  .nav-item:hover { background: #273548; color: #cbd5e1; }
+  .nav-item.active { background: #312e81; color: #a5b4fc; }
+  .nav-item.active .nav-icon { color: #818cf8; }
+
+  .nav-icon {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    color: inherit;
+  }
   .nav-label { overflow: hidden; text-overflow: ellipsis; }
 
-  .toggle-btn {
+  .collapse-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     margin: 0.75rem 0.5rem;
     padding: 0.5rem;
     background: none;
     border: 1px solid #334155;
-    color: #64748b;
-    border-radius: 6px;
+    color: #475569;
+    border-radius: 7px;
     cursor: pointer;
-    font-size: 0.75rem;
-    width: calc(100% - 1rem);
+    transition: background 0.12s, color 0.12s;
   }
-  .toggle-btn:hover { background: #334155; color: #94a3b8; }
+  .collapse-btn:hover { background: #334155; color: #94a3b8; }
 
-  .content {
-    overflow-y: auto;
-    min-height: 100vh;
-  }
+  /* ── Content ── */
+  .content { overflow-y: auto; min-height: 100vh; }
   .content-inner {
-    max-width: 1200px;
+    max-width: 1280px;
     margin: 0 auto;
     padding: 2rem;
   }

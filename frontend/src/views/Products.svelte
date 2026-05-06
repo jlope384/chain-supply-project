@@ -21,7 +21,9 @@
     { key: "category", label: "Categoría" },
     { key: "price", label: "Precio", render: (v) => `$${Number(v ?? 0).toFixed(2)}` },
     { key: "weight", label: "Peso (kg)" },
-    { key: "in_stock", label: "En Stock", render: (v) => v ? "✅" : "❌" },
+    { key: "in_stock", label: "En Stock", render: (v) => v
+        ? '<span class="badge green">En stock</span>'
+        : '<span class="badge red">Sin stock</span>' },
   ];
 
   async function load() {

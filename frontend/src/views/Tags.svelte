@@ -22,7 +22,9 @@
       key: "color_hex", label: "Color",
       render: (v) => `<span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:${v};vertical-align:middle;margin-right:6px;"></span>${v}`
     },
-    { key: "global", label: "Global", render: (v) => v ? "✅" : "❌" },
+    { key: "global", label: "Global", render: (v) => v
+        ? '<span class="badge blue">Global</span>'
+        : '<span class="badge red">Local</span>' },
     { key: "created_at", label: "Creado" },
   ];
 

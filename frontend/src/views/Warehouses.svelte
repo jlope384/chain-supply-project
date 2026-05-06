@@ -19,19 +19,21 @@
   }
 
   const columns = [
-    { key: "code", label: "Código" },
-    { key: "city", label: "Ciudad" },
-    { key: "capacity", label: "Capacidad" },
-    { key: "active", label: "Activo", render: (v) => v ? "✅" : "❌" },
+    { key: "code",      label: "Código" },
+    { key: "city",      label: "Ciudad" },
+    { key: "capacity",  label: "Capacidad", render: (v) => Number(v).toLocaleString() },
+    { key: "active",    label: "Activo",    render: (v) => v
+        ? '<span style="color:#4ade80">Activo</span>'
+        : '<span style="color:#f87171">Inactivo</span>' },
     { key: "opened_at", label: "Apertura" },
   ];
 
   const invColumns = [
-    { key: "sku", label: "SKU" },
-    { key: "name", label: "Producto" },
-    { key: "quantity", label: "Cantidad" },
-    { key: "reserved_qty", label: "Reservado" },
-    { key: "last_updated", label: "Actualizado" },
+    { key: "sku",         label: "SKU" },
+    { key: "name",        label: "Producto" },
+    { key: "quantity",    label: "Cantidad",  render: (v) => Number(v).toLocaleString() },
+    { key: "reserved_qty",label: "Reservado", render: (v) => Number(v).toLocaleString() },
+    { key: "last_updated",label: "Actualizado" },
   ];
 
   async function load() {
@@ -71,9 +73,7 @@
       }
       showModal = false;
       load();
-    } catch (e) {
-      toast(e.message, "error");
-    }
+    } catch (e) { toast(e.message, "error"); }
   }
 
   async function remove(row) {
@@ -89,38 +89,13 @@
     <button class="btn-primary" onclick={openCreate}>+ Nueva</button>
   </div>
 
-  <div class="table-wrap-custom">
-    {#if loading}
-      <p class="muted">Cargando...</p>
-    {:else if rows.length === 0}
-      <p class="muted">Sin bodegas registradas</p>
-    {:else}
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              {#each columns as col}<th>{col.label}</th>{/each}
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {#each rows as row}
-              <tr>
-                {#each columns as col}
-                  <td>{col.render ? col.render(row[col.key]) : row[col.key] ?? "—"}</td>
-                {/each}
-                <td class="actions">
-                  <button class="btn-icon" onclick={() => viewInventory(row)}>📦</button>
-                  <button class="btn-icon" onclick={() => openEdit(row)}>✏️</button>
-                  <button class="btn-icon" onclick={() => remove(row)}>🗑️</button>
-                </td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      </div>
-    {/if}
-  </div>
+  <DataTable
+    {rows} {columns} {loading}
+    onEdit={openEdit}
+    onDelete={remove}
+    onExtra={viewInventory}
+    extraTitle="Ver inventario"
+  />
 </div>
 
 <Modal bind:open={showModal} title={editing ? "Editar Bodega" : "Nueva Bodega"}>
@@ -147,16 +122,6 @@
   .page { display: flex; flex-direction: column; gap: 1.25rem; }
   .page-header { display: flex; justify-content: space-between; align-items: center; }
   h1 { margin: 0; font-size: 1.5rem; color: #f1f5f9; }
-  .muted { color: #64748b; }
-  .table-scroll { overflow-x: auto; border-radius: 8px; border: 1px solid #334155; }
-  table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
-  th { background: #1e293b; color: #94a3b8; padding: 0.75rem 1rem; text-align: left; font-weight: 600; border-bottom: 1px solid #334155; }
-  td { padding: 0.65rem 1rem; border-bottom: 1px solid #1e293b; color: #e2e8f0; }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: #1e293b; }
-  .actions { display: flex; gap: 0.5rem; }
-  .btn-icon { background: none; border: none; cursor: pointer; font-size: 1rem; opacity: 0.7; }
-  .btn-icon:hover { opacity: 1; }
   .form { display: flex; flex-direction: column; gap: 0.75rem; }
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
   label { display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.85rem; color: #94a3b8; }
