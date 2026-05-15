@@ -11,26 +11,30 @@
 <style>
   .toasts {
     position: fixed;
-    bottom: 1.5rem;
-    right: 1.5rem;
+    bottom: 1.25rem;
+    right: 1.25rem;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.4rem;
     z-index: 9999;
   }
   .toast {
-    padding: 0.75rem 1.25rem;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    max-width: 380px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    animation: slideIn 0.2s ease;
+    padding: 0.6rem 1rem 0.6rem 0.875rem;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    max-width: 340px;
+    border: 1px solid transparent;
+    border-left-width: 3px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    animation: slideIn 0.18s ease;
+    font-family: "Inter", -apple-system, sans-serif;
   }
   @keyframes slideIn {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
+    from { transform: translateX(20px); opacity: 0; }
+    to   { transform: translateX(0);    opacity: 1; }
   }
-  .toast-info { background: #1e40af; color: #bfdbfe; }
-  .toast-success { background: #166534; color: #bbf7d0; }
-  .toast-error { background: #7f1d1d; color: #fecaca; }
+  .toast-info    { background: var(--card); border-color: var(--border-sub); border-left-color: var(--blue);  color: var(--text); }
+  .toast-success { background: var(--card); border-color: var(--border-sub); border-left-color: var(--green); color: var(--text); }
+  .toast-error   { background: var(--card); border-color: var(--border-sub); border-left-color: var(--red);   color: var(--text); }
 </style>

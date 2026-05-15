@@ -58,7 +58,9 @@
 </script>
 
 <div class="page">
-  <h1>Carga Masiva CSV</h1>
+  <div class="page-header">
+    <h1>Carga CSV</h1>
+  </div>
   <p class="hint">Sube archivos CSV con encabezados. Los campos requeridos se muestran debajo de cada sección.</p>
 
   <div class="loaders">
@@ -94,23 +96,34 @@
 </div>
 
 <style>
-  .page { display: flex; flex-direction: column; gap: 1.5rem; }
-  h1 { margin: 0; font-size: 1.5rem; color: #f1f5f9; }
-  .hint { color: #64748b; margin: 0; font-size: 0.9rem; }
-  .loaders { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1rem; }
-  .loader-card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; }
-  h3 { margin: 0; font-size: 1rem; color: #f1f5f9; }
-  .cols { margin: 0; font-size: 0.8rem; color: #64748b; line-height: 1.5; }
-  .cols strong { color: #94a3b8; }
-  .upload-row { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
-  input[type="file"] { flex: 1; color: #94a3b8; font-size: 0.85rem; }
-  .btn-primary { background: #4f46e5; color: #fff; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; white-space: nowrap; }
-  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn-primary:hover:not(:disabled) { background: #4338ca; }
-  .result { background: #0f172a; border-radius: 6px; padding: 0.75rem; font-size: 0.85rem; color: #86efac; }
-  .result.has-errors { border: 1px solid #f59e0b; }
-  details { margin-top: 0.5rem; }
-  summary { cursor: pointer; color: #fde68a; font-size: 0.82rem; }
-  ul { margin: 0.35rem 0 0 1rem; padding: 0; color: #fca5a5; font-size: 0.8rem; }
-  li { margin-bottom: 0.25rem; }
+  .page { display: flex; flex-direction: column; gap: 1.25rem; }
+  .hint { color: var(--text-3); margin: -0.5rem 0 0; font-size: 0.8rem; }
+  .loaders { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 0.75rem; }
+  .loader-card {
+    background: var(--card);
+    border: 1px solid var(--border-sub);
+    border-radius: 6px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+  h3 { margin: 0; font-size: 0.875rem; font-weight: 600; color: var(--text); }
+  .cols { margin: 0; font-size: 0.75rem; color: var(--text-3); line-height: 1.6; }
+  .cols strong { color: var(--text-2); font-weight: 600; }
+  .upload-row { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; }
+  input[type="file"] { flex: 1; color: var(--text-2); font-size: 0.8rem; font-family: inherit; }
+  .result {
+    background: var(--hover);
+    border-radius: 5px;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.8rem;
+    color: var(--green);
+    border: 1px solid var(--border-sub);
+  }
+  .result.has-errors { border-color: rgba(251,191,36,0.3); }
+  details { margin-top: 0.35rem; }
+  summary { cursor: pointer; color: var(--amber); font-size: 0.78rem; }
+  ul { margin: 0.3rem 0 0 1rem; padding: 0; color: var(--red); font-size: 0.75rem; }
+  li { margin-bottom: 0.2rem; }
 </style>

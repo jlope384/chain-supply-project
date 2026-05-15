@@ -96,7 +96,9 @@
 </script>
 
 <div class="page">
-  <h1>Gestión de Relaciones</h1>
+  <div class="page-header">
+    <h1>Relaciones</h1>
+  </div>
 
   <div class="tabs">
     {#each relTabs as tab}
@@ -315,26 +317,32 @@
 
 <style>
   .page { display: flex; flex-direction: column; gap: 1.25rem; }
-  h1 { margin: 0; font-size: 1.5rem; color: #f1f5f9; }
-  .tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 0.35rem; }
   .tab {
-    background: #1e293b; border: 1px solid #334155; color: #94a3b8;
-    padding: 0.4rem 0.85rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600;
-    font-family: monospace;
+    background: var(--card);
+    border: 1px solid var(--border-sub);
+    color: var(--text-3);
+    padding: 0.28rem 0.65rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.7rem;
+    font-weight: 600;
+    font-family: ui-monospace, "Cascadia Code", "Fira Code", monospace;
+    letter-spacing: 0.03em;
+    transition: background 0.1s, color 0.1s, border-color 0.1s;
+    font-family: inherit;
   }
-  .tab.active { background: #4f46e5; color: #fff; border-color: #4f46e5; }
-  .form-card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 1.5rem; }
-  .form { display: flex; flex-direction: column; gap: 0.75rem; }
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  .tab:hover { color: var(--text-2); border-color: var(--border); background: var(--hover); }
+  .tab.active {
+    background: var(--cyan-dim);
+    color: var(--cyan);
+    border-color: var(--cyan-border);
+  }
+  .form-card {
+    background: var(--card);
+    border: 1px solid var(--border-sub);
+    border-radius: 6px;
+    padding: 1.25rem;
+  }
   .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; }
-  label { display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.85rem; color: #94a3b8; }
-  label.check { flex-direction: row; align-items: center; gap: 0.5rem; color: #e2e8f0; }
-  input, select {
-    background: #0f172a; border: 1px solid #334155; color: #e2e8f0;
-    padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.9rem; width: 100%; box-sizing: border-box;
-  }
-  .form-actions { display: flex; justify-content: flex-end; margin-top: 0.5rem; }
-  .btn-primary { background: #4f46e5; color: #fff; border: none; padding: 0.55rem 1.5rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 600; }
-  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn-primary:hover:not(:disabled) { background: #4338ca; }
 </style>

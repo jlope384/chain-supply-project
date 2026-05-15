@@ -29,28 +29,36 @@
   });
 </script>
 
-<div class="table-container">
+<div class="table-wrap">
   {#if searchable && rows.length > 0}
     <div class="search-bar">
-      <Search size={15} class="search-icon" />
+      <Search size={14} class="si" />
       <input
         bind:value={query}
         placeholder="Buscar..."
         class="search-input"
       />
       {#if query}
-        <button class="clear-btn" onclick={() => query = ""}>✕</button>
+        <button class="clear" onclick={() => query = ""}>✕</button>
       {/if}
     </div>
   {/if}
 
-  <div class="table-wrap">
+  <div class="table-scroll">
     {#if loading}
-      <div class="state-msg">Cargando...</div>
+      <div class="empty-state">
+        <div class="spinner"></div>
+        <span>Cargando...</span>
+      </div>
     {:else if rows.length === 0}
-      <div class="state-msg">Sin resultados</div>
+      <div class="empty-state">
+        <span class="empty-icon">—</span>
+        <span>Sin registros</span>
+      </div>
     {:else if filtered().length === 0}
-      <div class="state-msg">Sin coincidencias para "{query}"</div>
+      <div class="empty-state">
+        <span>Sin coincidencias para "<em>{query}</em>"</span>
+      </div>
     {:else}
       <table>
         <thead>
@@ -59,7 +67,7 @@
               <th>{col.label}</th>
             {/each}
             {#if onEdit || onDelete || onExtra}
-              <th class="th-actions">Acciones</th>
+              <th class="th-act"></th>
             {/if}
           </tr>
         </thead>
@@ -76,32 +84,20 @@
                 </td>
               {/each}
               {#if onEdit || onDelete || onExtra}
-                <td class="td-actions">
+                <td class="td-act">
                   {#if onExtra}
-                    <button
-                      class="btn-action extra"
-                      title={extraTitle}
-                      onclick={() => onExtra(row)}
-                    >
-                      <Archive size={14} />
+                    <button class="act-btn extra" title={extraTitle} onclick={() => onExtra(row)}>
+                      <Archive size={13} />
                     </button>
                   {/if}
                   {#if onEdit}
-                    <button
-                      class="btn-action edit"
-                      title="Editar"
-                      onclick={() => onEdit(row)}
-                    >
-                      <Pencil size={14} />
+                    <button class="act-btn edit" title="Editar" onclick={() => onEdit(row)}>
+                      <Pencil size={13} />
                     </button>
                   {/if}
                   {#if onDelete}
-                    <button
-                      class="btn-action del"
-                      title="Eliminar"
-                      onclick={() => onDelete(row)}
-                    >
-                      <Trash2 size={14} />
+                    <button class="act-btn del" title="Eliminar" onclick={() => onDelete(row)}>
+                      <Trash2 size={13} />
                     </button>
                   {/if}
                 </td>
@@ -111,136 +107,139 @@
         </tbody>
       </table>
       {#if query}
-        <div class="count-bar">
-          {filtered().length} de {rows.length} resultados
-        </div>
+        <div class="count-bar">{filtered().length} de {rows.length}</div>
       {/if}
     {/if}
   </div>
 </div>
 
 <style>
-  .table-container { display: flex; flex-direction: column; gap: 0; }
+  .table-wrap {
+    border: 1px solid var(--border-sub);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--card);
+  }
 
   .search-bar {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-bottom: none;
-    border-radius: 8px 8px 0 0;
-    padding: 0.6rem 0.875rem;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border-sub);
+    background: rgba(255,255,255,0.02);
   }
-  :global(.search-icon) { color: #475569; flex-shrink: 0; }
+  :global(.si) { color: var(--text-3); flex-shrink: 0; }
   .search-input {
     flex: 1;
-    background: none;
-    border: none;
-    outline: none;
-    color: #e2e8f0;
-    font-size: 0.875rem;
+    background: none !important;
+    border: none !important;
+    outline: none !important;
+    color: var(--text) !important;
+    font-size: 0.82rem !important;
+    padding: 0 !important;
+    width: auto !important;
+    box-shadow: none !important;
   }
-  .search-input::placeholder { color: #475569; }
-  .clear-btn {
+  .search-input::placeholder { color: var(--text-3); }
+  .clear {
     background: none;
     border: none;
-    color: #475569;
+    color: var(--text-3);
     cursor: pointer;
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     padding: 0;
     line-height: 1;
+    font-family: inherit;
   }
-  .clear-btn:hover { color: #94a3b8; }
+  .clear:hover { color: var(--text-2); }
 
-  .table-wrap {
-    overflow-x: auto;
-    border: 1px solid #334155;
-    border-radius: 0 0 8px 8px;
-  }
-  /* when no search bar, round all corners */
-  .table-container:not(:has(.search-bar)) .table-wrap {
-    border-radius: 8px;
-  }
+  .table-scroll { overflow-x: auto; }
 
-  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+  }
 
   th {
-    background: #1e293b;
-    color: #64748b;
-    padding: 0.65rem 1rem;
+    background: rgba(255,255,255,0.02);
+    color: var(--text-3);
+    padding: 0.55rem 0.875rem;
     text-align: left;
     font-weight: 600;
-    font-size: 0.78rem;
+    font-size: 0.72rem;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
     white-space: nowrap;
-    border-bottom: 1px solid #334155;
+    border-bottom: 1px solid var(--border-sub);
   }
-  .th-actions { text-align: right; padding-right: 1rem; }
+  .th-act { width: 1px; }
 
   td {
-    padding: 0.6rem 1rem;
-    border-bottom: 1px solid #1e293b;
-    color: #cbd5e1;
-    max-width: 220px;
+    padding: 0.55rem 0.875rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: var(--text-2);
+    max-width: 200px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
   tr:last-child td { border-bottom: none; }
-  tr:hover td { background: #1a2740; }
+  tr:hover td { background: rgba(255,255,255,0.02); color: var(--text); }
 
-  .td-actions {
+  .td-act {
     display: flex;
-    gap: 0.35rem;
+    gap: 0.25rem;
     justify-content: flex-end;
-    padding-right: 0.75rem;
+    padding-right: 0.6rem;
     white-space: nowrap;
   }
 
-  .btn-action {
+  .act-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
+    width: 26px;
+    height: 26px;
+    border-radius: 4px;
     border: 1px solid transparent;
     cursor: pointer;
-    transition: background 0.12s, border-color 0.12s, color 0.12s;
+    background: none;
+    color: var(--text-3);
+    transition: background 0.1s, color 0.1s, border-color 0.1s;
+    font-family: inherit;
   }
-  .btn-action.edit {
-    background: #1e3a5f;
-    color: #60a5fa;
-    border-color: #1e40af44;
-  }
-  .btn-action.edit:hover { background: #1e40af; color: #bfdbfe; }
-  .btn-action.del {
-    background: #3f1f1f;
-    color: #f87171;
-    border-color: #7f1d1d44;
-  }
-  .btn-action.del:hover { background: #7f1d1d; color: #fecaca; }
-  .btn-action.extra {
-    background: #1a3a2a;
-    color: #4ade80;
-    border-color: #14532d44;
-  }
-  .btn-action.extra:hover { background: #14532d; color: #bbf7d0; }
+  .act-btn:hover { color: var(--text); border-color: var(--border-sub); background: var(--hover); }
+  .act-btn.edit:hover { color: var(--blue); border-color: rgba(96,165,250,0.2); background: var(--blue-dim); }
+  .act-btn.del:hover  { color: var(--red);  border-color: rgba(248,113,113,0.2); background: var(--red-dim); }
+  .act-btn.extra:hover { color: var(--green); border-color: rgba(74,222,128,0.2); background: var(--green-dim); }
 
-  .state-msg {
-    padding: 2.5rem;
-    text-align: center;
-    color: #475569;
-    font-size: 0.9rem;
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 3rem;
+    color: var(--text-3);
+    font-size: 0.82rem;
   }
+  .empty-icon { font-size: 1.5rem; }
+  .spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border-sub);
+    border-top-color: var(--cyan);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
   .count-bar {
-    padding: 0.4rem 1rem;
-    font-size: 0.75rem;
-    color: #475569;
-    border-top: 1px solid #1e293b;
-    background: #0f172a;
-    border-radius: 0 0 8px 8px;
+    padding: 0.3rem 0.875rem;
+    font-size: 0.72rem;
+    color: var(--text-3);
+    border-top: 1px solid var(--border-sub);
+    background: rgba(255,255,255,0.015);
   }
 </style>
